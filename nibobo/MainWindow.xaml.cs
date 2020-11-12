@@ -24,6 +24,7 @@ namespace nibobo
         const int BLOCK_SIZE = 40;
         const int CIRCLE_SIZE = 35;
         const int LINE_SIZE = 10;
+        const int EDGE_SIZE = 2;
 
         public MainWindow()
         {
@@ -46,6 +47,16 @@ namespace nibobo
             foreach (PlacedBlock pb in board.m_blocks)
             {
                 DrawBlock(pb);
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 10 - i; j++)
+                {
+                    if (board.m_index[i, j] == 0)
+                    {
+                        DrawCircle(i, j, System.Drawing.Color.LightGray);
+                    }
+                }
             }
         }
 
@@ -115,7 +126,36 @@ namespace nibobo
         /// </summary>
         private void DrawBoardEdge()
         {
-            // TODO later.
+            Line line = new Line()
+            {
+                X1 = (double)(-5),
+                Y1 = (double)(-5),
+                X2 = (double)(-5),
+                Y2 = (double)(BLOCK_SIZE * 11),
+                Stroke = Brushes.Black,
+                StrokeThickness = EDGE_SIZE
+            };
+            BoardCanvas.Children.Add(line);
+            line = new Line()
+            {
+                X1 = (double)(-5),
+                Y1 = (double)(-5),
+                X2 = (double)(BLOCK_SIZE * 11),
+                Y2 = (double)(-5),
+                Stroke = Brushes.Black,
+                StrokeThickness = EDGE_SIZE
+            };
+            BoardCanvas.Children.Add(line);
+            line = new Line()
+            {
+                X1 = (double)(BLOCK_SIZE * 11),
+                Y1 = (double)(-5),
+                X2 = (double)(-5),
+                Y2 = (double)(BLOCK_SIZE * 11),
+                Stroke = Brushes.Black,
+                StrokeThickness = EDGE_SIZE
+            };
+            BoardCanvas.Children.Add(line);
         }
     }
 }
