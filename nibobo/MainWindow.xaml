@@ -16,5 +16,7 @@
                 <RotateTransform Angle="45"/>
             </Canvas.RenderTransform>
         </Canvas>
+        <Button x:Name="ShowExampleBoard1" Content="Ex Board 1" HorizontalAlignment="Left" Height="30" Margin="687,61,0,0" VerticalAlignment="Top" Width="75" Click="ShowExampleBoard1_Click"/>
+        <Button x:Name="ShowExampleBoard2" Content="Ex Board 2" HorizontalAlignment="Left" Height="30" Margin="687,96,0,0" VerticalAlignment="Top" Width="75" Click="ShowExampleBoard2_Click"/>
     </Grid>
 </Window>

@@ -20,7 +20,6 @@ namespace nibobo
         public MainWindow()
         {
             InitializeComponent();
-            DrawExampleBoard1();
         }
 
         private void DrawExampleBoard1()
@@ -38,6 +37,24 @@ namespace nibobo
             b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
             b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
             b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
+            DrawBoard(b1);
+        }
+
+        private void DrawExampleBoard2()
+        {
+            Board b1 = new Board();
+            b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 0, 0, 4);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 0, 1, 6);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 2, 1);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 6, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 0, 7, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 1, 3, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 2, 4, 4);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 2, 5, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 3, 0, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 4, 1, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 5, 1, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 7, 0, 2);
             DrawBoard(b1);
         }
 
@@ -139,6 +156,16 @@ namespace nibobo
             };
             polygon.Points = new PointCollection() { new Point(-5, -5), new Point(-5, BLOCK_SIZE * 11), new Point(BLOCK_SIZE * 11, -5) };
             BoardCanvas.Children.Add(polygon);
+        }
+
+        private void ShowExampleBoard1_Click(object sender, RoutedEventArgs e)
+        {
+            DrawExampleBoard1();
+        }
+
+        private void ShowExampleBoard2_Click(object sender, RoutedEventArgs e)
+        {
+            DrawExampleBoard2();
         }
     }
 }
