@@ -7,13 +7,13 @@ public class BlockFactory
 {
     private Dictionary<string, Block> m_namedBlocks = new Dictionary<string, Block>();
     private static BlockFactory m_singleton = null;
+    public static string[] m_blockNames = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" };
 
     private BlockFactory()
 	{
-        string[] blockNames = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" };
-        for (int i = 0; i < blockNames.Length; i++)
+        for (int i = 0; i < m_blockNames.Length; i++)
         {
-            m_namedBlocks.Add(blockNames[i], MakeBlockByName(blockNames[i]));
+            m_namedBlocks.Add(m_blockNames[i], MakeBlockByName(m_blockNames[i]));
         }
     }
 

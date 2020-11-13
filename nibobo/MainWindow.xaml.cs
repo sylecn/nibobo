@@ -167,5 +167,59 @@ namespace nibobo
         {
             DrawExampleBoard2();
         }
+
+        private void SolveBoard1_Click(object sender, RoutedEventArgs e)
+        {
+            Board b1 = new Board();
+            b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
+            SolveBoardInGUI(b1);
+        }
+
+        private void SolveBoardInGUI(Board b1)
+        {
+            DateTime startTime = DateTime.Now;
+            DrawBoard(b1);
+            MsgBox.Text = startTime.ToString() + " solving puzzle...\n";
+            Board b = b1.Solve();
+            DateTime endTime = DateTime.Now;
+            if (b != null)
+            {
+                DrawBoard(b);
+                MsgBox.Text += endTime.ToString() + " solved\n";
+            }
+            else
+            {
+                MsgBox.Text += endTime.ToString() + " No solution found\n";
+            }
+        }
+
+        private void SolveBoard2_Click(object sender, RoutedEventArgs e)
+        {
+            Board b1 = new Board();
+            b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
+            //b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
+            SolveBoardInGUI(b1);
+        }
     }
 }
