@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -19,6 +20,11 @@ namespace nibobo
         public MainWindow()
         {
             InitializeComponent();
+            DrawExampleBoard1();
+        }
+
+        private void DrawExampleBoard1()
+        {
             Board b1 = new Board();
             b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
             b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);

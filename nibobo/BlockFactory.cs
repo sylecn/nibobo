@@ -24,7 +24,7 @@ public class BlockFactory
         switch (name)
         {
             case "A":
-                b.m_color = Color.Gray;
+                b.m_color = Color.FromArgb(255, 115, 136, 155);
                 b.m_varients.Add(new int[4, 4]{
                     {0, 1, 0, 0},
                     {0, 1, 0, 0},
@@ -42,7 +42,7 @@ public class BlockFactory
                 });
                 break;
             case "C":
-                b.m_color = Color.LightPink;
+                b.m_color = Color.FromArgb(255, 211, 198, 205);
                 b.m_varients.Add(new int[4, 4]{
                     {0, 1, 0, 0},
                     {0, 1, 0, 0},
@@ -69,7 +69,7 @@ public class BlockFactory
                 });
                 break;
             case "F":
-                b.m_color = Color.Pink;
+                b.m_color = Color.FromArgb(255, 252, 121, 166);
                 b.m_varients.Add(new int[4, 4]{
                     {0, 1, 0, 0},
                     {1, 1, 0, 0},
@@ -78,7 +78,7 @@ public class BlockFactory
                 });
                 break;
             case "G":
-                b.m_color = Color.Blue;
+                b.m_color = Color.FromArgb(255, 0, 58, 217);
                 b.m_varients.Add(new int[4, 4]{
                     {0, 0, 1, 0},
                     {0, 0, 1, 0},
@@ -96,7 +96,7 @@ public class BlockFactory
                 });
                 break;
             case "I":
-                b.m_color = Color.White;
+                b.m_color = Color.FromArgb(255, 209, 220, 238);
                 b.m_varients.Add(new int[4, 4]{
                     {1, 0, 1, 0},
                     {1, 1, 1, 0},
@@ -123,7 +123,7 @@ public class BlockFactory
                 });
                 break;
             case "L":
-                b.m_color = Color.Red;
+                b.m_color = Color.FromArgb(255, 200, 20, 31);
                 b.m_varients.Add(new int[4, 4]{
                     {0, 1, 0, 0},
                     {1, 1, 1, 0},
