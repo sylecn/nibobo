@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace nibobo
@@ -29,12 +19,20 @@ namespace nibobo
         public MainWindow()
         {
             InitializeComponent();
-            Board board = new Board();
-            Block blockA = BlockFactory.GetBlockByName("A");
-            Block blockJ = BlockFactory.GetBlockByName("J");
-            board.PlaceBlock(blockA, 0, 1);
-            board.PlaceBlock(blockJ, 0, 0);
-            DrawBoard(board);
+            Board b1 = new Board();
+            b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
+            DrawBoard(b1);
         }
 
         /// <summary>
@@ -66,22 +64,22 @@ namespace nibobo
         /// <param name="block"></param>
         private void DrawBlock(PlacedBlock pb)
         {
-            Block b = pb.block;
-            Position pos = pb.position;
+            Block b = pb.m_block;
+            Position pos = pb.m_position;
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    if (b.m_index[i, j] == 1)
+                    if (pb[i, j] == 1)
                     {
                         int x = pos.x + i;
                         int y = pos.y + j;
                         DrawCircle(x, y, b.m_color);
-                        if (i + 1 < 4 && b.m_index[i + 1, j] == 1)
+                        if (i + 1 < 4 && pb[i + 1, j] == 1)
                         {
                             DrawLine(x, y, x + 1, y, b.m_color);
                         }
-                        if (j + 1 < 4 && b.m_index[i, j + 1] == 1)
+                        if (j + 1 < 4 && pb[i, j + 1] == 1)
                         {
                             DrawLine(x, y, x, y + 1, b.m_color);
                         }
@@ -126,36 +124,15 @@ namespace nibobo
         /// </summary>
         private void DrawBoardEdge()
         {
-            Line line = new Line()
+            Polygon polygon = new Polygon()
             {
-                X1 = (double)(-5),
-                Y1 = (double)(-5),
-                X2 = (double)(-5),
-                Y2 = (double)(BLOCK_SIZE * 11),
-                Stroke = Brushes.Black,
-                StrokeThickness = EDGE_SIZE
+                Stroke = Brushes.DarkGray,
+                Fill = Brushes.DarkGray,
+                StrokeThickness = EDGE_SIZE,
+
             };
-            BoardCanvas.Children.Add(line);
-            line = new Line()
-            {
-                X1 = (double)(-5),
-                Y1 = (double)(-5),
-                X2 = (double)(BLOCK_SIZE * 11),
-                Y2 = (double)(-5),
-                Stroke = Brushes.Black,
-                StrokeThickness = EDGE_SIZE
-            };
-            BoardCanvas.Children.Add(line);
-            line = new Line()
-            {
-                X1 = (double)(BLOCK_SIZE * 11),
-                Y1 = (double)(-5),
-                X2 = (double)(-5),
-                Y2 = (double)(BLOCK_SIZE * 11),
-                Stroke = Brushes.Black,
-                StrokeThickness = EDGE_SIZE
-            };
-            BoardCanvas.Children.Add(line);
+            polygon.Points = new PointCollection() { new Point(-5, -5), new Point(-5, BLOCK_SIZE * 11), new Point(BLOCK_SIZE * 11, -5) };
+            BoardCanvas.Children.Add(polygon);
         }
     }
 }

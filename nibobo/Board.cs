@@ -19,18 +19,19 @@ public class Board
     /// <param name="block">the block to add to board</param>
     /// <param name="x">row number</param>
     /// <param name="y">column number</param>
-    internal void PlaceBlock(Block block, int x, int y)
+    internal void PlaceBlock(Block block, int x, int y, int varient)
     {
-        PlacedBlock pb = new PlacedBlock();
-        pb.block = block;
-        pb.position = new Position(x, y);
+        PlacedBlock pb = new PlacedBlock(block, varient, x, y);
         m_blocks.Add(pb);
 
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
-                m_index[x + i, y + j] += block.m_index[i, j];
+                if (x + i < 10 && y + j < 10)
+                {
+                    m_index[x + i, y + j] += pb[i, j];
+                }
             }
         }
     }
