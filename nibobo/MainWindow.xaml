@@ -5,21 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:nibobo"
         mc:Ignorable="d"
-        Title="MainWindow" Height="480" Width="850">
+        Title="MainWindow" Height="840" Width="1024">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="383*"/>
-            <ColumnDefinition Width="17*"/>
-        </Grid.ColumnDefinitions>
-        <Canvas x:Name="BoardCanvas" HorizontalAlignment="Left" Height="560" Margin="410,30,0,0" VerticalAlignment="Top" Width="560" Grid.ColumnSpan="2">
+        <Canvas x:Name="PuzzleCanvas" HorizontalAlignment="Left" Height="560" Margin="410,30,0,0" VerticalAlignment="Top" Width="560" Grid.ColumnSpan="2">
             <Canvas.RenderTransform>
                 <RotateTransform Angle="45"/>
             </Canvas.RenderTransform>
         </Canvas>
-        <Button x:Name="ShowExampleBoard1" Content="Ex Board 1" HorizontalAlignment="Left" Height="30" Margin="687,61,0,0" VerticalAlignment="Top" Width="75" Click="ShowExampleBoard1_Click"/>
-        <Button x:Name="ShowExampleBoard2" Content="Ex Board 2" HorizontalAlignment="Left" Height="30" Margin="687,96,0,0" VerticalAlignment="Top" Width="75" Click="ShowExampleBoard2_Click"/>
-        <Button x:Name="SolveBoard1" Content="Solve B1" HorizontalAlignment="Left" Height="30" Margin="687,131,0,0" VerticalAlignment="Top" Width="75" Click="SolveBoard1_Click"/>
-        <Button x:Name="SolveBoard2" Content="Solve B2" HorizontalAlignment="Left" Height="30" Margin="687,166,0,0" VerticalAlignment="Top" Width="75" Click="SolveBoard2_Click"/>
-        <TextBox x:Name="MsgBox" HorizontalAlignment="Left" Height="186" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212"/>
+        <Canvas x:Name="AnswerCanvas" HorizontalAlignment="Left" Height="560" Margin="410,410,0,0" VerticalAlignment="Top" Width="560" Grid.ColumnSpan="2">
+            <Canvas.RenderTransform>
+                <RotateTransform Angle="45"/>
+            </Canvas.RenderTransform>
+        </Canvas>
+        <TextBox x:Name="MsgBox" HorizontalAlignment="Left" Height="101" Margin="653,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="341"/>
+        <Label Content="Puzzle Board" HorizontalAlignment="Left" Margin="368,349,0,0" VerticalAlignment="Top"/>
+        <Label Content="Answer Board" HorizontalAlignment="Left" Margin="368,737,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="GeneratePuzzleButton" Content="Generate Puzzle" HorizontalAlignment="Left" Height="34" Margin="882,142,0,0" VerticalAlignment="Top" Width="112" Click="GeneratePuzzleButton_Click"/>
+        <TextBox x:Name="BlocksOnBoardTextBox" HorizontalAlignment="Left" Height="29" Margin="829,145,0,0" Text="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" TextAlignment="Left"/>
+        <Label Content="# of Blocks on board (0-10)" HorizontalAlignment="Left" Height="30" Margin="653,144,0,0" VerticalAlignment="Top" Width="171"/>
+        <Button x:Name="SolvePuzzleButton" Content="Solve Puzzle" HorizontalAlignment="Left" Height="39" Margin="780,472,0,0" VerticalAlignment="Top" Width="112" Click="SolvePuzzleButton_Click"/>
+        <Button x:Name="PreviousSolution" Content="Prev Solution" HorizontalAlignment="Left" Height="39" Margin="780,516,0,0" VerticalAlignment="Top" Width="112"/>
+        <Button x:Name="NextSolution" Content="Next Solution" HorizontalAlignment="Left" Height="39" Margin="780,560,0,0" VerticalAlignment="Top" Width="112"/>
     </Grid>
 </Window>

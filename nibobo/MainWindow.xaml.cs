@@ -16,10 +16,15 @@ namespace nibobo
         const int CIRCLE_SIZE = 35;
         const int LINE_SIZE = 10;
         const int EDGE_SIZE = 2;
+        private Board m_puzzle;
 
         public MainWindow()
         {
             InitializeComponent();
+            Board emptyBoard = new Board();
+            DrawBoard(PuzzleCanvas, emptyBoard);
+            DrawBoard(AnswerCanvas, emptyBoard);
+            MsgBox.Text = "nibobo solver is ready.\nYou may generate a puzzle and ask me to solve it.";
         }
 
         private void DrawExampleBoard1()
@@ -37,7 +42,7 @@ namespace nibobo
             b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
             b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
             b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
-            DrawBoard(b1);
+            DrawBoard(PuzzleCanvas, b1);
         }
 
         private void DrawExampleBoard2()
@@ -55,19 +60,19 @@ namespace nibobo
             b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 4, 1, 2);
             b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 5, 1, 0);
             b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 7, 0, 2);
-            DrawBoard(b1);
+            DrawBoard(AnswerCanvas, b1);
         }
 
         /// <summary>
         /// Draw game board in Canvas
         /// </summary>
         /// <param name="board">the board to draw</param>
-        private void DrawBoard(Board board)
+        private void DrawBoard(Canvas canvas, Board board)
         {
-            DrawBoardEdge();
+            DrawBoardEdge(canvas);
             foreach (PlacedBlock pb in board.m_blocks)
             {
-                DrawBlock(pb);
+                DrawBlock(canvas, pb);
             }
             for (int i = 0; i < 10; i++)
             {
@@ -75,7 +80,7 @@ namespace nibobo
                 {
                     if (board.m_index[i, j] == 0)
                     {
-                        DrawCircle(i, j, System.Drawing.Color.LightGray);
+                        DrawCircle(canvas, i, j, System.Drawing.Color.LightGray);
                     }
                 }
             }
@@ -85,7 +90,7 @@ namespace nibobo
         /// Draw block on game board.
         /// </summary>
         /// <param name="block"></param>
-        private void DrawBlock(PlacedBlock pb)
+        private void DrawBlock(Canvas canvas, PlacedBlock pb)
         {
             Block b = pb.m_block;
             Position pos = pb.m_position;
@@ -97,21 +102,21 @@ namespace nibobo
                     {
                         int x = pos.x + i;
                         int y = pos.y + j;
-                        DrawCircle(x, y, b.m_color);
+                        DrawCircle(canvas, x, y, b.m_color);
                         if (i + 1 < 4 && pb[i + 1, j] == 1)
                         {
-                            DrawLine(x, y, x + 1, y, b.m_color);
+                            DrawLine(canvas, x, y, x + 1, y, b.m_color);
                         }
                         if (j + 1 < 4 && pb[i, j + 1] == 1)
                         {
-                            DrawLine(x, y, x, y + 1, b.m_color);
+                            DrawLine(canvas, x, y, x, y + 1, b.m_color);
                         }
                     }
                 }
             }
         }
 
-        private void DrawLine(int x1, int y1, int x2, int y2, System.Drawing.Color m_color)
+        private void DrawLine(Canvas canvas, int x1, int y1, int x2, int y2, System.Drawing.Color m_color)
         {
             SolidColorBrush brush = new SolidColorBrush(Color.FromArgb(m_color.A, m_color.R, m_color.G, m_color.B));
             Line line = new Line()
@@ -123,10 +128,10 @@ namespace nibobo
                 Stroke = brush,
                 StrokeThickness = LINE_SIZE
             };
-            BoardCanvas.Children.Add(line);
+            canvas.Children.Add(line);
         }
 
-        private void DrawCircle(int x, int y, System.Drawing.Color m_color)
+        private void DrawCircle(Canvas canvas, int x, int y, System.Drawing.Color m_color)
         {
             SolidColorBrush brush = new SolidColorBrush(Color.FromArgb(m_color.A, m_color.R, m_color.G, m_color.B));
             Ellipse circle = new Ellipse()
@@ -137,7 +142,7 @@ namespace nibobo
                 Fill = brush,
                 StrokeThickness = 1
             };
-            BoardCanvas.Children.Add(circle);
+            canvas.Children.Add(circle);
             circle.SetValue(Canvas.TopProperty, (double)x * BLOCK_SIZE);
             circle.SetValue(Canvas.LeftProperty, (double)y * BLOCK_SIZE);
         }
@@ -145,7 +150,7 @@ namespace nibobo
         /// <summary>
         /// Draw game board edge and background.
         /// </summary>
-        private void DrawBoardEdge()
+        private void DrawBoardEdge(Canvas canvas)
         {
             Polygon polygon = new Polygon()
             {
@@ -155,20 +160,10 @@ namespace nibobo
 
             };
             polygon.Points = new PointCollection() { new Point(-5, -5), new Point(-5, BLOCK_SIZE * 11), new Point(BLOCK_SIZE * 11, -5) };
-            BoardCanvas.Children.Add(polygon);
+            canvas.Children.Add(polygon);
         }
 
-        private void ShowExampleBoard1_Click(object sender, RoutedEventArgs e)
-        {
-            DrawExampleBoard1();
-        }
-
-        private void ShowExampleBoard2_Click(object sender, RoutedEventArgs e)
-        {
-            DrawExampleBoard2();
-        }
-
-        private void SolveBoard1_Click(object sender, RoutedEventArgs e)
+        private static Board GetExamplePuzzle1()
         {
             Board b1 = new Board();
             b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
@@ -183,19 +178,19 @@ namespace nibobo
             //b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
             //b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
             //b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
-            SolveBoardInGUI(b1);
+            return b1;
         }
 
         private void SolveBoardInGUI(Board b1)
         {
             DateTime startTime = DateTime.Now;
-            DrawBoard(b1);
+            DrawBoard(PuzzleCanvas, b1);
             MsgBox.Text = startTime.ToString() + " solving puzzle...\n";
             Board b = b1.Solve();
             DateTime endTime = DateTime.Now;
             if (b != null)
             {
-                DrawBoard(b);
+                DrawBoard(AnswerCanvas, b);
                 MsgBox.Text += endTime.ToString() + " solved\n";
             }
             else
@@ -204,7 +199,7 @@ namespace nibobo
             }
         }
 
-        private void SolveBoard2_Click(object sender, RoutedEventArgs e)
+        private static Board GetExamplePuzzle2()
         {
             Board b1 = new Board();
             b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
@@ -219,7 +214,39 @@ namespace nibobo
             //b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
             //b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
             //b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
-            SolveBoardInGUI(b1);
+            return b1;
+        }
+
+        private void GeneratePuzzleButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO handle exception when input is not valid.
+            int numberOfBlocksOnBoard;
+            try
+            {
+                numberOfBlocksOnBoard = Int32.Parse(BlocksOnBoardTextBox.Text);
+                if (numberOfBlocksOnBoard < 0 || numberOfBlocksOnBoard > 10)
+                {
+                    MsgBox.Text = "number of blocks on board should be integer 0-10";
+                    return;
+                }
+            }
+            catch (FormatException)
+            {
+                MsgBox.Text = "number of blocks on board should be integer 0-10";
+                return;
+            }
+            m_puzzle = GetExamplePuzzle2();
+            DrawBoard(PuzzleCanvas, m_puzzle);
+        }
+
+        private void SolvePuzzleButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (m_puzzle == null)
+            {
+                MsgBox.Text = "Please generate puzzle first";
+                return;
+            }
+            SolveBoardInGUI(m_puzzle);
         }
     }
 }
