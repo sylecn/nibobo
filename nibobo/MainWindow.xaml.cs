@@ -36,6 +36,7 @@ namespace nibobo
         const int CIRCLE_SIZE = 35;
         const int LINE_SIZE = 10;
         const int EDGE_SIZE = 2;
+        const string VERSION = "1.0.0";
         private static readonly Board EMPTY_BOARD = new Board();
         private static readonly System.Drawing.Color EMPTY_CELL_COLOR = System.Drawing.Color.LightGray;
         private static readonly System.Drawing.Color HIGHLIGHT_CELL_COLOR = System.Drawing.Color.DeepSkyBlue;
@@ -55,7 +56,10 @@ namespace nibobo
             m_puzzle = new Board();
             DrawBoard(PuzzleCanvas, EMPTY_BOARD);
             DrawBoard(AnswerCanvas, EMPTY_BOARD);
-            MsgBox.Text = "nibobo solver is ready.\nYou may generate a puzzle and ask me to solve it.\n";
+            MsgBox.Text = string.Format("nibobo solver {0} is ready.\n" +
+                "To solve the empty board, click Solve Puzzle button.\n" +
+                "To solve a puzzle that is on exercise book, click Manual Generate button and place the blocks on the puzzle board.\n" +
+                "You may also auto generate a puzzle and solve it.\n", VERSION);
         }
 
         private void DrawExampleBoard1()
@@ -164,6 +168,12 @@ namespace nibobo
         /// <param name="pos"></param>
         private void cellClick(object sender, MouseButtonEventArgs e, Position pos)
         {
+            Ellipse circle = (Ellipse)sender;
+            // only allow click on puzzle canvas.
+            if (circle.Parent != PuzzleCanvas)
+            {
+                return;
+            }
             if (m_guiState != GUIState.MANUAL_GENERATE)
             {
                 return;
