@@ -46,6 +46,11 @@ public class PlacedBlock
             m_block.m_varients[m_varient][i, j] = value;
         }
     }
+
+    public override string ToString()
+    {
+        return string.Format("PlacedBlock(name={0}, varient={1}, position={2})", m_block.m_name, m_varient, m_position);
+    }
 }
 
 public class Position
@@ -63,5 +68,27 @@ public class Position
     {
         this.x = x;
         this.y = y;
+    }
+
+    // override object.Equals
+    public override bool Equals(object obj)
+    {
+        if (obj == null || GetType() != obj.GetType())
+        {
+            return false;
+        }
+        Position rhs = (Position)obj;
+        return x == rhs.x && y == rhs.y;
+    }
+
+    // override object.GetHashCode
+    public override int GetHashCode()
+    {
+        return System.HashCode.Combine(x, y);
+    }
+
+    public override string ToString()
+    {
+        return string.Format("Position({0}, {1})", x, y);
     }
 }

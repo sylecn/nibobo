@@ -1,0 +1,35 @@
+2020-11-14
+
+* notes                                    :entry:
+* current                                  :entry:
+** 
+** 2020-11-14 how to generate all solutions to show in GUI?
+I need threads and blocking pipes.
+
+In solver thread, push results in a multi-thread enabled queue/list.
+In GUI thread, try read result from the queue/list.
+
+- to make sure we don't use too much CPU, solver thread should create 10 results at a time, then
+  block until GUI thread read existing results.
+
+* done                                      :entry:
+** 2020-11-15 how to generate puzzle by user?
+GUI design:
+
+<puzzle board>           generate puzzle manully
+                         next block
+                         remove last block
+                         finish placement
+
+"click cell to highlight all block cells for next placed block. click the same cell to cancel highlight."
+"click next block to confirm highlighted block."
+
+game will recognize block type and varient, add it to game board and use correct color to draw it.
+
+
+- button enable/disable logic. using FSM.
+
+GUI_STATE_FREE
+GUI_STATE_AUTO_GENERATE
+GUI_STATE_MANUAL_GENERATE
+

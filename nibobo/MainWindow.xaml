@@ -20,11 +20,15 @@
         <TextBox x:Name="MsgBox" HorizontalAlignment="Left" Height="101" Margin="653,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="341"/>
         <Label Content="Puzzle Board" HorizontalAlignment="Left" Margin="368,349,0,0" VerticalAlignment="Top"/>
         <Label Content="Answer Board" HorizontalAlignment="Left" Margin="368,737,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="GeneratePuzzleButton" Content="Generate Puzzle" HorizontalAlignment="Left" Height="34" Margin="882,142,0,0" VerticalAlignment="Top" Width="112" Click="GeneratePuzzleButton_Click"/>
+        <Button x:Name="AutoGeneratePuzzleButton" Content="Auto Generate" HorizontalAlignment="Left" Height="34" Margin="882,142,0,0" VerticalAlignment="Top" Width="112" Click="AutoGeneratePuzzleButton_Click"/>
         <TextBox x:Name="BlocksOnBoardTextBox" HorizontalAlignment="Left" Height="29" Margin="829,145,0,0" Text="5" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" TextAlignment="Left"/>
         <Label Content="# of Blocks on board (0-10)" HorizontalAlignment="Left" Height="30" Margin="653,144,0,0" VerticalAlignment="Top" Width="171"/>
         <Button x:Name="SolvePuzzleButton" Content="Solve Puzzle" HorizontalAlignment="Left" Height="39" Margin="780,472,0,0" VerticalAlignment="Top" Width="112" Click="SolvePuzzleButton_Click"/>
         <Button x:Name="PreviousSolution" Content="Prev Solution" HorizontalAlignment="Left" Height="39" Margin="780,516,0,0" VerticalAlignment="Top" Width="112"/>
         <Button x:Name="NextSolution" Content="Next Solution" HorizontalAlignment="Left" Height="39" Margin="780,560,0,0" VerticalAlignment="Top" Width="112"/>
+        <Button x:Name="ManualGeneratePuzzleButton" Content="Manual Generate" HorizontalAlignment="Left" Margin="780,191,0,0" VerticalAlignment="Top" Height="41" Width="112" Click="ManualGeneratePuzzleButton_Click"/>
+        <Button x:Name="NextBlockButton" Content="Next Block" HorizontalAlignment="Left" Margin="780,237,0,0" VerticalAlignment="Top" Height="41" Width="112" IsEnabled="False" Click="NextBlockButton_Click"/>
+        <Button x:Name="RemoveLastBlockButton" Content="Remove Last Block" HorizontalAlignment="Left" Margin="780,283,0,0" VerticalAlignment="Top" Height="41" Width="112" IsEnabled="False" Click="RemoveLastBlockButton_Click"/>
+        <Button x:Name="FinishPlacementButton" Content="Finish Placement" HorizontalAlignment="Left" Margin="780,329,0,0" VerticalAlignment="Top" Height="41" Width="112" IsEnabled="False" Click="FinishPlacementButton_Click"/>
     </Grid>
 </Window>

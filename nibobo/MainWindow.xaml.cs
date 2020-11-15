@@ -1,11 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Linq;
 
 namespace nibobo
 {
+    internal enum GUIState
+    {
+        /// <summary>
+        /// User can generate puzzle, or solve the default empty puzzle.
+        /// </summary>
+        FREE,
+        /// <summary>
+        /// User has clicked auto generate puzzle button, game engine will generate a board with given number of pieces.
+        /// </summary>
+        AUTO_GENERATE,
+        /// <summary>
+        /// User has clicked manual generate puzzle button, user can now place block on puzzle board.
+        /// </summary>
+        MANUAL_GENERATE,
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -16,51 +36,36 @@ namespace nibobo
         const int CIRCLE_SIZE = 35;
         const int LINE_SIZE = 10;
         const int EDGE_SIZE = 2;
+        private static readonly Board EMPTY_BOARD = new Board();
+        private static readonly System.Drawing.Color EMPTY_CELL_COLOR = System.Drawing.Color.LightGray;
+        private static readonly System.Drawing.Color HIGHLIGHT_CELL_COLOR = System.Drawing.Color.DeepSkyBlue;
+        /// <summary>
+        /// Stores board shown in puzzle board.
+        /// </summary>
         private Board m_puzzle;
+        private GUIState m_guiState = GUIState.FREE;
+        /// <summary>
+        /// Stores highlighted cells when manual generate puzzle board.
+        /// </summary>
+        private List<Position> m_highlightPositions = new List<Position>();
 
         public MainWindow()
         {
             InitializeComponent();
-            Board emptyBoard = new Board();
-            DrawBoard(PuzzleCanvas, emptyBoard);
-            DrawBoard(AnswerCanvas, emptyBoard);
-            MsgBox.Text = "nibobo solver is ready.\nYou may generate a puzzle and ask me to solve it.";
+            m_puzzle = new Board();
+            DrawBoard(PuzzleCanvas, EMPTY_BOARD);
+            DrawBoard(AnswerCanvas, EMPTY_BOARD);
+            MsgBox.Text = "nibobo solver is ready.\nYou may generate a puzzle and ask me to solve it.\n";
         }
 
         private void DrawExampleBoard1()
         {
-            Board b1 = new Board();
-            b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
-            DrawBoard(PuzzleCanvas, b1);
+            DrawBoard(PuzzleCanvas, Board.GetExampleBoard1());
         }
 
         private void DrawExampleBoard2()
         {
-            Board b1 = new Board();
-            b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 0, 0, 4);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 0, 1, 6);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 2, 1);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 6, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 0, 7, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 1, 3, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 2, 4, 4);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 2, 5, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 3, 0, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 4, 1, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 5, 1, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 7, 0, 2);
-            DrawBoard(AnswerCanvas, b1);
+            DrawBoard(AnswerCanvas, Board.GetExampleBoard2());
         }
 
         /// <summary>
@@ -80,7 +85,7 @@ namespace nibobo
                 {
                     if (board.m_index[i, j] == 0)
                     {
-                        DrawCircle(canvas, i, j, System.Drawing.Color.LightGray);
+                        DrawCircle(canvas, i, j, EMPTY_CELL_COLOR);
                     }
                 }
             }
@@ -142,9 +147,44 @@ namespace nibobo
                 Fill = brush,
                 StrokeThickness = 1
             };
+            circle.MouseDown += delegate (object sender, MouseButtonEventArgs e)
+            {
+                cellClick(sender, e, new Position(x, y));
+            };
             canvas.Children.Add(circle);
             circle.SetValue(Canvas.TopProperty, (double)x * BLOCK_SIZE);
             circle.SetValue(Canvas.LeftProperty, (double)y * BLOCK_SIZE);
+        }
+
+        /// <summary>
+        /// Event handler when user click a cell when generating puzzle manully.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <param name="pos"></param>
+        private void cellClick(object sender, MouseButtonEventArgs e, Position pos)
+        {
+            if (m_guiState != GUIState.MANUAL_GENERATE)
+            {
+                return;
+            }
+            Debug.WriteLine("User click on cell {0}", pos);
+            // do not allow click a cell if it is already covered by a block.
+            if (m_puzzle.m_index[pos.x, pos.y] == 1)
+            {
+                return;
+            }
+            // toggle highlight status
+            if (m_highlightPositions.Contains(pos))
+            {
+                DrawCircle(PuzzleCanvas, pos.x, pos.y, EMPTY_CELL_COLOR);
+                m_highlightPositions.Remove(pos);
+            }
+            else
+            {
+                DrawCircle(PuzzleCanvas, pos.x, pos.y, HIGHLIGHT_CELL_COLOR);
+                m_highlightPositions.Add(pos);
+            }
         }
 
         /// <summary>
@@ -161,24 +201,6 @@ namespace nibobo
             };
             polygon.Points = new PointCollection() { new Point(-5, -5), new Point(-5, BLOCK_SIZE * 11), new Point(BLOCK_SIZE * 11, -5) };
             canvas.Children.Add(polygon);
-        }
-
-        private static Board GetExamplePuzzle1()
-        {
-            Board b1 = new Board();
-            b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
-            b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
-            return b1;
         }
 
         private void SolveBoardInGUI(Board b1)
@@ -199,27 +221,8 @@ namespace nibobo
             }
         }
 
-        private static Board GetExamplePuzzle2()
+        private void AutoGeneratePuzzleButton_Click(object sender, RoutedEventArgs e)
         {
-            Board b1 = new Board();
-            b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
-            //b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
-            return b1;
-        }
-
-        private void GeneratePuzzleButton_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO handle exception when input is not valid.
             int numberOfBlocksOnBoard;
             try
             {
@@ -235,8 +238,31 @@ namespace nibobo
                 MsgBox.Text = "number of blocks on board should be integer 0-10";
                 return;
             }
-            m_puzzle = GetExamplePuzzle2();
+
+            Debug.Assert(m_guiState == GUIState.FREE);
+            m_guiState = GUIState.AUTO_GENERATE;
+            AutoGeneratePuzzleButton.IsEnabled = false;
+            SolvePuzzleButton.IsEnabled = false;
+            PreviousSolution.IsEnabled = false;
+            NextSolution.IsEnabled = false;
+
+            m_puzzle = GetExamplePuzzle3();
             DrawBoard(PuzzleCanvas, m_puzzle);
+            DrawBoard(AnswerCanvas, EMPTY_BOARD);
+
+            m_guiState = GUIState.FREE;
+            AutoGeneratePuzzleButton.IsEnabled = true;
+            SolvePuzzleButton.IsEnabled = true;
+            PreviousSolution.IsEnabled = true;
+            NextSolution.IsEnabled = true;
+        }
+
+        private Board GetExamplePuzzle3()
+        {
+            Board b1 = new Board();
+            b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 0, 2);
+            b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 2, 0, 2);
+            return b1;
         }
 
         private void SolvePuzzleButton_Click(object sender, RoutedEventArgs e)
@@ -247,6 +273,113 @@ namespace nibobo
                 return;
             }
             SolveBoardInGUI(m_puzzle);
+        }
+
+        /// <summary>
+        /// Start generate a puzzle by placing block on game board manually. To place a block, just click all cells of that block on game board, then click
+        /// Next Block button or Finish Placement button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ManualGeneratePuzzleButton_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.Assert(m_guiState == GUIState.FREE);
+            m_guiState = GUIState.MANUAL_GENERATE;
+            m_puzzle = new Board();
+            DrawBoard(PuzzleCanvas, m_puzzle);
+            DrawBoard(AnswerCanvas, m_puzzle);
+            m_highlightPositions.Clear();
+            AutoGeneratePuzzleButton.IsEnabled = false;
+            SolvePuzzleButton.IsEnabled = false;
+            PreviousSolution.IsEnabled = false;
+            NextSolution.IsEnabled = false;
+            NextBlockButton.IsEnabled = true;
+            RemoveLastBlockButton.IsEnabled = true;
+            FinishPlacementButton.IsEnabled = true;
+            MsgBox.Text = "Click puzzle board cells to highlight them to form a placed block.\nClick Next Block button to confirm.\nClick Finish placement to confirm puzzle.\n";
+        }
+
+        private void FinishPlacementButton_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.Assert(m_guiState == GUIState.MANUAL_GENERATE);
+            m_guiState = GUIState.FREE;
+            AutoGeneratePuzzleButton.IsEnabled = true;
+            SolvePuzzleButton.IsEnabled = true;
+            PreviousSolution.IsEnabled = true;
+            NextSolution.IsEnabled = true;
+            NextBlockButton.IsEnabled = false;
+            RemoveLastBlockButton.IsEnabled = false;
+            FinishPlacementButton.IsEnabled = false;
+        }
+
+        /// <summary>
+        /// If cells in m_highlightPositions forms one block, add block in m_puzzle, and draw the block. Otherwise, do nothing.
+        /// </summary>
+        /// <returns>PlacedBlock if block is found, null otherwise</returns>
+        private PlacedBlock FindAndHighlightBlockMaybe()
+        {
+            int minX = m_highlightPositions.Select(pos => pos.x).Min();
+            int minY = m_highlightPositions.Select(pos => pos.y).Min();
+            int maxX = m_highlightPositions.Select(pos => pos.x).Max();
+            int maxY = m_highlightPositions.Select(pos => pos.y).Max();
+            if (maxX - minX > 3 || maxY - minY > 3)
+            {
+                return null;
+            }
+            int[,] hlBlockIndex = new int[4, 4];
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (m_highlightPositions.Contains(new Position(minX + i, minY + j)))
+                    {
+                        hlBlockIndex[i, j] = 1;
+                    }
+                }
+            }
+            foreach (string name in BlockFactory.m_blockNames)
+            {
+                Block b = BlockFactory.GetBlockByName(name);
+                for (int i = 0; i < b.m_varients.Count; i++)
+                {
+                    if (BlockFactory.ArrayEquals(b.m_varients[i], hlBlockIndex))
+                    {
+                        PlacedBlock pb = new PlacedBlock(b, i, minX, minY);
+                        return pb;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// If highlighted cells can form a block, add PlacedBlock in m_puzzle and clear m_highlightPositions.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NextBlockButton_Click(object sender, RoutedEventArgs e)
+        {
+            PlacedBlock pb = FindAndHighlightBlockMaybe();
+            if (pb == null)
+            {
+                MsgBox.Text = "Invalid Block. Please double check highlighted cells.\n";
+                return;
+            }
+            if (m_puzzle.m_blocks.Any(e => e.m_block.m_name == pb.m_block.m_name))
+            {
+                MsgBox.Text = "Duplicate Block. Please double check highlighted cells.\n";
+                return;
+            }
+            Debug.WriteLine("Found {0}", pb);
+            m_puzzle.PlaceBlock(pb.m_block, pb.m_position.x, pb.m_position.y, pb.m_varient);
+            m_highlightPositions.Clear();
+            DrawBoard(PuzzleCanvas, m_puzzle);
+        }
+
+        private void RemoveLastBlockButton_Click(object sender, RoutedEventArgs e)
+        {
+            m_puzzle.RemoveLastBlock();
+            DrawBoard(PuzzleCanvas, m_puzzle);
         }
     }
 }

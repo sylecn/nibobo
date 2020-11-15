@@ -26,6 +26,78 @@ public class Board
         m_blocks = board.m_blocks.ToList();
     }
 
+    public static Board GetExampleBoard1()
+    {
+        Board b1 = new Board();
+        b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
+        return b1;
+    }
+
+    public static Board GetExampleBoard2()
+    {
+        Board b1 = new Board();
+        b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 0, 0, 4);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 0, 1, 6);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 2, 1);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 6, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 0, 7, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 1, 3, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 2, 4, 4);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 2, 5, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 3, 0, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 4, 1, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 5, 1, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 7, 0, 2);
+        return b1;
+    }
+
+    private static Board GetExamplePuzzle1()
+    {
+        Board b1 = new Board();
+        b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
+        b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
+        return b1;
+    }
+
+    private static Board GetExamplePuzzle2()
+    {
+        Board b1 = new Board();
+        b1.PlaceBlock(BlockFactory.GetBlockByName("G"), 0, 0, 2);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("C"), 0, 2, 0);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("J"), 0, 4, 0);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("I"), 0, 5, 2);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("F"), 0, 8, 2);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("K"), 1, 1, 0);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("L"), 1, 5, 0);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("E"), 3, 0, 1);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("H"), 3, 3, 0);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("A"), 4, 0, 1);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("D"), 6, 0, 4);
+        //b1.PlaceBlock(BlockFactory.GetBlockByName("B"), 6, 1, 5);
+        return b1;
+    }
+
     /// <summary>
     /// Place a block at given position. Do not check for collision.
     /// </summary>
@@ -44,6 +116,32 @@ public class Board
                 if (x + i < 10 && y + j < 10)
                 {
                     m_index[x + i, y + j] += pb[i, j];
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Remove last block placed by PlaceBlock().
+    /// </summary>
+    public void RemoveLastBlock()
+    {
+        int len = m_blocks.Count;
+        if (len == 0)
+        {
+            return;
+        }
+        PlacedBlock pb = m_blocks[len - 1];
+        m_blocks.RemoveAt(len - 1);
+        int x = pb.m_position.x;
+        int y = pb.m_position.y;
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                if (x + i < 10 && y + j < 10 && pb[i, j] == 1)
+                {
+                    m_index[x + i, y + j] = 0;
                 }
             }
         }
