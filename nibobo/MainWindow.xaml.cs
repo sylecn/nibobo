@@ -7,6 +7,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Linq;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace nibobo
 {
@@ -37,6 +40,7 @@ namespace nibobo
         const int LINE_SIZE = 10;
         const int EDGE_SIZE = 2;
         const string VERSION = "1.0.0";
+        const int NUMBER_OF_ANSWERS_TO_CALCULATE_AT_A_TIME = 10;
         private static readonly Board EMPTY_BOARD = new Board();
         private static readonly System.Drawing.Color EMPTY_CELL_COLOR = System.Drawing.Color.LightGray;
         private static readonly System.Drawing.Color HIGHLIGHT_CELL_COLOR = System.Drawing.Color.DeepSkyBlue;
@@ -49,6 +53,17 @@ namespace nibobo
         /// Stores highlighted cells when manual generate puzzle board.
         /// </summary>
         private List<Position> m_highlightPositions = new List<Position>();
+
+        CancellationTokenSource m_tokenSource = new CancellationTokenSource();
+        /// <summary>
+        /// For thread support, calculate at most this many answers at a time.
+        /// </summary>
+        private BlockingCollection<Board> m_answersQueue;
+        /// <summary>
+        /// keep the answers that solver returns.
+        /// </summary>
+        private List<Board> m_answers = new List<Board>();
+        private int m_currentAnswerIndex = -1;
 
         public MainWindow()
         {
@@ -231,6 +246,36 @@ namespace nibobo
             }
         }
 
+        private void SolveBoardInGUINonBlocking(Board b1)
+        {
+            DateTime startTime = DateTime.Now;
+            DrawBoard(PuzzleCanvas, b1);
+            MsgBox.Text = startTime.ToString() + " solving puzzle...\n";
+            CancellationToken ct = m_tokenSource.Token;
+            m_answersQueue = new BlockingCollection<Board>(NUMBER_OF_ANSWERS_TO_CALCULATE_AT_A_TIME);
+            Task solver = Task.Run(() =>
+            {
+                b1.Solve(m_answersQueue, ct);
+            }, m_tokenSource.Token);
+
+            DateTime endTime = DateTime.Now;
+            Board b;
+            try
+            {
+                b = m_answersQueue.Take();
+            }
+            catch (InvalidOperationException)
+            {
+                MsgBox.Text += string.Format("{0} No solution found\n", endTime);
+                return;
+            }
+            Debug.Assert(b != null);
+            m_answers.Add(b);
+            m_currentAnswerIndex = 0;
+            DrawBoard(AnswerCanvas, b);
+            MsgBox.Text += string.Format("{0} showing solution {1}\n", endTime, m_currentAnswerIndex);
+        }
+
         private void AutoGeneratePuzzleButton_Click(object sender, RoutedEventArgs e)
         {
             int numberOfBlocksOnBoard;
@@ -282,7 +327,10 @@ namespace nibobo
                 MsgBox.Text = "Please generate puzzle first";
                 return;
             }
-            SolveBoardInGUI(m_puzzle);
+            //SolveBoardInGUI(m_puzzle);
+            m_answers.Clear();
+            m_currentAnswerIndex = -1;
+            SolveBoardInGUINonBlocking(m_puzzle);
         }
 
         /// <summary>
@@ -294,6 +342,7 @@ namespace nibobo
         private void ManualGeneratePuzzleButton_Click(object sender, RoutedEventArgs e)
         {
             Debug.Assert(m_guiState == GUIState.FREE);
+            //m_tokenSource.Cancel();
             m_guiState = GUIState.MANUAL_GENERATE;
             m_puzzle = new Board();
             DrawBoard(PuzzleCanvas, m_puzzle);
@@ -390,6 +439,37 @@ namespace nibobo
         {
             m_puzzle.RemoveLastBlock();
             DrawBoard(PuzzleCanvas, m_puzzle);
+        }
+
+        private void NextSolution_Click(object sender, RoutedEventArgs e)
+        {
+            DateTime endTime = DateTime.Now;
+            Board b;
+            try
+            {
+                b = m_answersQueue.Take();
+            }
+            catch (InvalidOperationException)
+            {
+                MsgBox.Text += string.Format("{0} No more solution\n", endTime);
+                return;
+            }
+            Debug.Assert(b != null);
+            m_answers.Add(b);
+            m_currentAnswerIndex++;
+            DrawBoard(AnswerCanvas, b);
+            MsgBox.Text += string.Format("{0} showing solution {1}\n", endTime, m_currentAnswerIndex);
+        }
+
+        private void PreviousSolution_Click(object sender, RoutedEventArgs e)
+        {
+            if (m_currentAnswerIndex > 0)
+            {
+                DateTime endTime = DateTime.Now;
+                m_currentAnswerIndex--;
+                DrawBoard(AnswerCanvas, m_answers[m_currentAnswerIndex]);
+                MsgBox.Text += string.Format("{0} showing solution {1}\n", endTime, m_currentAnswerIndex);
+            }
         }
     }
 }

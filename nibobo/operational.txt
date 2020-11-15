@@ -1,17 +1,18 @@
 2020-11-14
 
 * notes                                    :entry:
+** docs
+- ConcurrentQueue<T> Class (System.Collections.Concurrent) | Microsoft Docs
+  https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentqueue-1?view=net-5.0
+  doesn't support blocking operation.
+- BlockingCollection<T> Class (System.Collections.Concurrent) | Microsoft Docs
+  https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.blockingcollection-1?view=net-5.0
+- Task Cancellation | Microsoft Docs
+  https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-cancellation
+- 
 * current                                  :entry:
 ** 
-** 2020-11-14 how to generate all solutions to show in GUI?
-I need threads and blocking pipes.
-
-In solver thread, push results in a multi-thread enabled queue/list.
-In GUI thread, try read result from the queue/list.
-
-- to make sure we don't use too much CPU, solver thread should create 10 results at a time, then
-  block until GUI thread read existing results.
-
+** 2020-11-15 implement auto generate button.
 * done                                      :entry:
 ** 2020-11-15 how to generate puzzle by user?
 GUI design:
@@ -32,4 +33,18 @@ game will recognize block type and varient, add it to game board and use correct
 GUI_STATE_FREE
 GUI_STATE_AUTO_GENERATE
 GUI_STATE_MANUAL_GENERATE
+** 2020-11-14 how to generate all solutions to show in GUI?
+I need threads and blocking pipes.
 
+In solver thread, push results in a multi-thread enabled queue/list.
+In GUI thread, try read result from the queue/list.
+
+- to make sure we don't use too much CPU, solver thread should create 10 results at a time, then
+  block until GUI thread read existing results.
+- problems
+  - when I generate 10 solutions at a time.
+    when I change puzzle board, old Task may still generating new solution, which is incorrect for the new puzzle board.
+    I need to properly cancel the old Task.
+
+    Task cancel is not easy.
+    Just use a new queue.

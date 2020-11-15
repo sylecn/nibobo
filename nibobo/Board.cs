@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -11,8 +12,10 @@ public class Board
 {
 	public int[,] m_index = new int[10, 10];
     public List<PlacedBlock> m_blocks = new List<PlacedBlock>();
+    private BlockingCollection<Board> m_answersQueue = null;
+    private System.Threading.CancellationToken m_cancellationToken;
 
-	public Board()
+    public Board()
 	{
 	}
 
@@ -24,6 +27,8 @@ public class Board
     {
         Array.Copy(board.m_index, m_index, board.m_index.Length);
         m_blocks = board.m_blocks.ToList();
+        m_answersQueue = board.m_answersQueue;
+        m_cancellationToken = board.m_cancellationToken;
     }
 
     public static Board GetExampleBoard1()
@@ -161,7 +166,23 @@ public class Board
                 restBlocks.Add(BlockFactory.GetBlockByName(name));
             }
         }
-        return DoSolve(this, restBlocks);
+        Board result = DoSolve(this, restBlocks);
+        if (m_answersQueue != null)
+        {
+            m_answersQueue.CompleteAdding();
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Place blocks on board so all cells are filled.
+    /// </summary>
+    /// <param name="m_answersQueue">all answers will be put in this blocking queue.</param>
+    internal void Solve(BlockingCollection<Board> answersQueue, System.Threading.CancellationToken ct)
+    {
+        m_answersQueue = answersQueue;
+        m_cancellationToken = ct;
+        Solve();
     }
 
     private static Board DoSolve(Board board, List<Block> restBlocks)
@@ -187,7 +208,20 @@ public class Board
                     Board result = DoSolve(newBoard, newRestBlocks);
                     if (result != null)
                     {
-                        return result;  // return first solution for the puzzle.
+                        if (newBoard.m_answersQueue != null)
+                        {
+                            if (newBoard.m_cancellationToken.IsCancellationRequested)
+                            {
+                                return null;
+                            }
+                            newBoard.m_answersQueue.Add(result);
+                            // Debug.WriteLine("Adding result to queue");
+                            // continue
+                        }
+                        else
+                        {
+                            return result;  // return first solution for the puzzle.
+                        }
                     }
                 }
             }
