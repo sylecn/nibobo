@@ -12,13 +12,21 @@
 - 
 * current                                  :entry:
 ** 
+** 2020-11-15 implement auto generate button.
+* done                                      :entry:
 ** 2020-11-16 c# task still block wpf gui thread
 GUI hangs when there is no solution and search toke a while.
 
 just don't use a blocking get in GUI thread.
 
-** 2020-11-15 implement auto generate button.
-* done                                      :entry:
+b = m_answersQueue.Take();
+
+That would need to use a timer (pull periodically) or a callback (update GUI when result is fetched).
+I will leave it.
+
+user interface - WPF asynchronous Task<T> blocking UI - Stack Overflow
+https://stackoverflow.com/questions/23934236/wpf-asynchronous-taskt-blocking-ui
+
 ** 2020-11-15 how to generate puzzle by user?
 GUI design:
 

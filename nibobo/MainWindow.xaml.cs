@@ -233,7 +233,7 @@ namespace nibobo
         {
             DateTime startTime = DateTime.Now;
             DrawBoard(PuzzleCanvas, b1);
-            MsgBox.Text = startTime.ToString() + " solving puzzle...\n";
+            MsgBox.Text = startTime.ToString() + " Solving puzzle...\n";
             Board b = b1.Solve();
             DateTime endTime = DateTime.Now;
             if (b != null)
@@ -251,7 +251,7 @@ namespace nibobo
         {
             DateTime startTime = DateTime.Now;
             DrawBoard(PuzzleCanvas, b1);
-            MsgBox.Text = startTime.ToString() + " solving puzzle...\n";
+            MsgBox.Text = startTime.ToString() + " Solving puzzle...\n";
             CancellationToken ct = m_tokenSource.Token;
             m_answersQueue = new BlockingCollection<Board>(NUMBER_OF_ANSWERS_TO_CALCULATE_AT_A_TIME);
             Task solver = Task.Run(() =>
@@ -259,30 +259,7 @@ namespace nibobo
                 b1.Solve(m_answersQueue, ct);
             }, m_tokenSource.Token);
 
-            DateTime endTime;
-            Board b;
-            try
-            {
-                b = m_answersQueue.Take();
-            }
-            catch (InvalidOperationException)
-            {
-                m_allSolutionFetched = true;
-                SolutionNumberLabel.Content = "No solution!";
-                endTime = DateTime.Now;
-                MsgBox.Text += string.Format("{0} No solution found\n", endTime);
-                NextSolution.IsEnabled = false;
-                PreviousSolution.IsEnabled = false;
-                return;
-            }
-            Debug.Assert(b != null);
-            endTime = DateTime.Now;
-            m_answers.Add(b);
-            m_currentAnswerIndex = 0;
-            DrawBoard(AnswerCanvas, b);
-            NextSolution.IsEnabled = true;
-            SolutionNumberLabel.Content = string.Format("Solution {0}", m_currentAnswerIndex + 1);
-            MsgBox.Text += string.Format("{0} Solution {0}\n", endTime, m_currentAnswerIndex + 1);
+            NextSolution_Click(null, null);
         }
 
         private void AutoGeneratePuzzleButton_Click(object sender, RoutedEventArgs e)
@@ -484,21 +461,50 @@ namespace nibobo
                 NextSolution.IsEnabled = false;
                 return;
             }
-            try
+
+            Task<Board>.Factory.StartNew(() =>
             {
-                b = m_answersQueue.Take();
-            }
-            catch (InvalidOperationException)
+                try
+                {
+                    Board b = m_answersQueue.Take();
+                    return b;
+                }
+                catch (InvalidOperationException)
+                {
+                    return null;
+                }
+            }).ContinueWith(t =>
             {
-                m_allSolutionFetched = true;
-                MsgBox.Text += string.Format("{0} No more solution\n", endTime);
-                NextSolution.IsEnabled = false;
-                return;
-            }
-            Debug.Assert(b != null);
-            m_answers.Add(b);
-            m_currentAnswerIndex++;
-            ShowSavedSolution();
+                Board b = t.Result;
+                DateTime endTime = DateTime.Now;
+                if (b == null)
+                {
+                    m_allSolutionFetched = true;
+                    NextSolution.IsEnabled = false;
+                    if (m_currentAnswerIndex == -1)
+                    {
+                        SolutionNumberLabel.Content = "No solution!";
+                        MsgBox.Text += string.Format("{0} No solution found\n", endTime);
+                        PreviousSolution.IsEnabled = false;
+                    }
+                    else
+                    {
+                        MsgBox.Text += string.Format("{0} All solutions fetched\n", endTime);
+                    }
+                }
+                else
+                {
+                    m_answers.Add(b);
+                    m_currentAnswerIndex++;
+                    ShowSavedSolution();
+                    NextSolution.IsEnabled = true;
+                    if (m_currentAnswerIndex == 0)
+                    {
+                        // only show timestamp for first solution.
+                        MsgBox.Text += string.Format("{0} Solution {1}\n", endTime, m_currentAnswerIndex + 1);
+                    }
+                }
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private void PreviousSolution_Click(object sender, RoutedEventArgs e)
