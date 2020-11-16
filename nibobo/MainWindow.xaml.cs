@@ -39,7 +39,7 @@ namespace nibobo
         const int CIRCLE_SIZE = 35;
         const int LINE_SIZE = 10;
         const int EDGE_SIZE = 2;
-        const string VERSION = "1.0.0";
+        const string VERSION = "1.0.1";
         const int NUMBER_OF_ANSWERS_TO_CALCULATE_AT_A_TIME = 10;
         private static readonly Board EMPTY_BOARD = new Board();
         private static readonly System.Drawing.Color EMPTY_CELL_COLOR = System.Drawing.Color.LightGray;
