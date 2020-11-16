@@ -64,6 +64,7 @@ namespace nibobo
         /// </summary>
         private List<Board> m_answers = new List<Board>();
         private int m_currentAnswerIndex = -1;
+        private bool m_allSolutionFetched = false;
 
         public MainWindow()
         {
@@ -71,7 +72,7 @@ namespace nibobo
             m_puzzle = new Board();
             DrawBoard(PuzzleCanvas, EMPTY_BOARD);
             DrawBoard(AnswerCanvas, EMPTY_BOARD);
-            MsgBox.Text = string.Format("nibobo solver {0} is ready.\n" +
+            MsgBox.Text = string.Format("nibobo solver {0}\n" +
                 "To solve the empty board, click Solve Puzzle button.\n" +
                 "To solve a puzzle that is on exercise book, click Manual Generate button and place the blocks on the puzzle board.\n" +
                 "You may also auto generate a puzzle and solve it.\n", VERSION);
@@ -258,7 +259,7 @@ namespace nibobo
                 b1.Solve(m_answersQueue, ct);
             }, m_tokenSource.Token);
 
-            DateTime endTime = DateTime.Now;
+            DateTime endTime;
             Board b;
             try
             {
@@ -266,14 +267,22 @@ namespace nibobo
             }
             catch (InvalidOperationException)
             {
+                m_allSolutionFetched = true;
+                SolutionNumberLabel.Content = "No solution!";
+                endTime = DateTime.Now;
                 MsgBox.Text += string.Format("{0} No solution found\n", endTime);
+                NextSolution.IsEnabled = false;
+                PreviousSolution.IsEnabled = false;
                 return;
             }
             Debug.Assert(b != null);
+            endTime = DateTime.Now;
             m_answers.Add(b);
             m_currentAnswerIndex = 0;
             DrawBoard(AnswerCanvas, b);
-            MsgBox.Text += string.Format("{0} showing solution {1}\n", endTime, m_currentAnswerIndex);
+            NextSolution.IsEnabled = true;
+            SolutionNumberLabel.Content = string.Format("Solution {0}", m_currentAnswerIndex + 1);
+            MsgBox.Text += string.Format("{0} Solution {0}\n", endTime, m_currentAnswerIndex + 1);
         }
 
         private void AutoGeneratePuzzleButton_Click(object sender, RoutedEventArgs e)
@@ -308,8 +317,8 @@ namespace nibobo
             m_guiState = GUIState.FREE;
             AutoGeneratePuzzleButton.IsEnabled = true;
             SolvePuzzleButton.IsEnabled = true;
-            PreviousSolution.IsEnabled = true;
-            NextSolution.IsEnabled = true;
+            PreviousSolution.IsEnabled = false;
+            NextSolution.IsEnabled = false;
         }
 
         private Board GetExamplePuzzle3()
@@ -327,9 +336,12 @@ namespace nibobo
                 MsgBox.Text = "Please generate puzzle first";
                 return;
             }
+            SolvePuzzleButton.IsEnabled = false;
             //SolveBoardInGUI(m_puzzle);
             m_answers.Clear();
             m_currentAnswerIndex = -1;
+            m_allSolutionFetched = false;
+            SolutionNumberLabel.Content = "Solving...";
             SolveBoardInGUINonBlocking(m_puzzle);
         }
 
@@ -364,11 +376,13 @@ namespace nibobo
             m_guiState = GUIState.FREE;
             AutoGeneratePuzzleButton.IsEnabled = true;
             SolvePuzzleButton.IsEnabled = true;
-            PreviousSolution.IsEnabled = true;
-            NextSolution.IsEnabled = true;
+            PreviousSolution.IsEnabled = false;
+            NextSolution.IsEnabled = false;
             NextBlockButton.IsEnabled = false;
             RemoveLastBlockButton.IsEnabled = false;
             FinishPlacementButton.IsEnabled = false;
+            MsgBox.Text = "Click Solve Puzzle to solve it.";
+            SolvePuzzleButton.IsEnabled = true;
         }
 
         /// <summary>
@@ -377,6 +391,10 @@ namespace nibobo
         /// <returns>PlacedBlock if block is found, null otherwise</returns>
         private PlacedBlock FindAndHighlightBlockMaybe()
         {
+            if (m_highlightPositions.Count == 0)
+            {
+                return null;
+            }
             int minX = m_highlightPositions.Select(pos => pos.x).Min();
             int minY = m_highlightPositions.Select(pos => pos.y).Min();
             int maxX = m_highlightPositions.Select(pos => pos.x).Max();
@@ -441,24 +459,46 @@ namespace nibobo
             DrawBoard(PuzzleCanvas, m_puzzle);
         }
 
+        private void ShowSavedSolution()
+        {
+            DrawBoard(AnswerCanvas, m_answers[m_currentAnswerIndex]);
+            if (m_currentAnswerIndex > 0)
+            {
+                PreviousSolution.IsEnabled = true;
+            }
+            SolutionNumberLabel.Content = string.Format("Solution {0}", m_currentAnswerIndex + 1);
+        }
+
         private void NextSolution_Click(object sender, RoutedEventArgs e)
         {
             DateTime endTime = DateTime.Now;
             Board b;
+            if (m_answers.Count > m_currentAnswerIndex + 1)
+            {
+                m_currentAnswerIndex++;
+                ShowSavedSolution();
+                return;
+            }
+            if (m_allSolutionFetched)
+            {
+                NextSolution.IsEnabled = false;
+                return;
+            }
             try
             {
                 b = m_answersQueue.Take();
             }
             catch (InvalidOperationException)
             {
+                m_allSolutionFetched = true;
                 MsgBox.Text += string.Format("{0} No more solution\n", endTime);
+                NextSolution.IsEnabled = false;
                 return;
             }
             Debug.Assert(b != null);
             m_answers.Add(b);
             m_currentAnswerIndex++;
-            DrawBoard(AnswerCanvas, b);
-            MsgBox.Text += string.Format("{0} showing solution {1}\n", endTime, m_currentAnswerIndex);
+            ShowSavedSolution();
         }
 
         private void PreviousSolution_Click(object sender, RoutedEventArgs e)
@@ -468,7 +508,12 @@ namespace nibobo
                 DateTime endTime = DateTime.Now;
                 m_currentAnswerIndex--;
                 DrawBoard(AnswerCanvas, m_answers[m_currentAnswerIndex]);
-                MsgBox.Text += string.Format("{0} showing solution {1}\n", endTime, m_currentAnswerIndex);
+                NextSolution.IsEnabled = true;
+                if (m_currentAnswerIndex == 0)
+                {
+                    PreviousSolution.IsEnabled = false;
+                }
+                SolutionNumberLabel.Content = string.Format("Solution {0}", m_currentAnswerIndex + 1);
             }
         }
     }

@@ -12,6 +12,11 @@
 - 
 * current                                  :entry:
 ** 
+** 2020-11-16 c# task still block wpf gui thread
+GUI hangs when there is no solution and search toke a while.
+
+just don't use a blocking get in GUI thread.
+
 ** 2020-11-15 implement auto generate button.
 * done                                      :entry:
 ** 2020-11-15 how to generate puzzle by user?
