@@ -14,7 +14,7 @@ The Solver
 --------------------
 This solver use a basic depth first search to find (all) solutions for a given puzzle.
 It rotates the board 90 degreen to the left, which make the board half of a 10x10 rectangle.
-Then it tries to fit blocks to the first empty cell couting from top to bottom, left to right.
+Then it tries to fit blocks to the first empty cell counting from top to bottom, left to right.
 When all pieces are fit and the board is full, the puzzle is solved.
 
 The GUI
@@ -33,7 +33,8 @@ To solve the puzzle, click "Solve Puzzle". To view all solutions, click "Next So
 ChangeLog
 ---------------------
 
-v1.0.1
-- Added README.rst file.
-- Added game board picture and game GUI picture.
-- published on github.
+- v1.0.1
+
+  - Added README.rst file.
+  - Added game board picture and game GUI picture.
+  - published on github.
